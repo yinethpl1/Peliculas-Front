@@ -1,23 +1,23 @@
 import { axiosInstance } from '../helper/axios-config';
 
-const getInventories = () => {
-    return axiosInstance.get('inventory', {
+const getDirector = () => {
+    return axiosInstance.get('director', {
         headers: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const createInventory = (data) => {
-    return axiosInstance.get('inventory', data, {
+const createDirector = (data) => {
+    return axiosInstance.post('director', data, {
         headers: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const updateInventory = (inventoryId, data) => {
-    return axiosInstance.get(`inventory/${inventoryId}`, data, {
+const updateDirector = (directorId, data) => {
+    return axiosInstance.get(`director/${directorId}`, data, {
         headers: {
             'Content-type': 'application/json'
         }
@@ -25,5 +25,5 @@ const updateInventory = (inventoryId, data) => {
 }
 
 export {
-    getInventories, createInventory, updateInventory
+    getDirector, createDirector, updateDirector
 }

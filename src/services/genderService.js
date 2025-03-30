@@ -1,23 +1,23 @@
 import { axiosInstance } from '../helper/axios-config';
 
-const getUsers = () => {
-    return axiosInstance.get('user', {
+const getGender = () => {
+    return axiosInstance.get('gender', {
         headers: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const createUser = (data) => {
-    return axiosInstance.get('user', data, {
+const createGender = (data) => {
+    return axiosInstance.get('gender', data, {
         headers: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const updateUser = (userId, data) => {
-    return axiosInstance.get(`user/${userId}`, data, {
+const updateGender = (genderId, data) => {
+    return axiosInstance.get(`gender/${genderId}`, data, {
         headers: {
             'Content-type': 'application/json'
         }
@@ -25,5 +25,5 @@ const updateUser = (userId, data) => {
 }
 
 export {
-    getUsers, createUser, updateUser
+    getGender, createGender, updateGender
 }

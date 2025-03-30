@@ -1,23 +1,23 @@
 import { axiosInstance } from '../helper/axios-config';
 
-const getType = () => {
-    return axiosInstance.get('type', {
+const getMedia = () => {
+    return axiosInstance.get('media', {
         headers: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const createType = (data) => {
-    return axiosInstance.post('type', data, {
-        headers: {
+const createMedia = (data) => {
+    return axiosInstance.post('media', data, {
+        header: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const updateType = (typeId, data) => {
-    return axiosInstance.put(`type/${typeId}`, data, {
+const updateMedia = (mediaId, data) => {
+    return axiosInstance.put(`media/${mediaId}`, data, {
         headers: {
             'Content-type': 'application/json'
         }
@@ -25,5 +25,5 @@ const updateType = (typeId, data) => {
 }
 
 export {
-    getType, createType, updateType
+    getMedia, createMedia, updateMedia
 }

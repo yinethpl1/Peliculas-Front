@@ -1,23 +1,23 @@
 import { axiosInstance } from '../helper/axios-config';
 
-const getBrands = () => {
-    return axiosInstance.get('brand', {
+const getProducer = () => {
+    return axiosInstance.get('producer', {
         headers: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const createBrand = (data) => {
-    return axiosInstance.get('brand', data, {
+const createProducer = (data) => {
+    return axiosInstance.post('producer', data, {
         headers: {
             'Content-type': 'application/json'
         }
     });
 }
 
-const updateBrand = (brandId, data) => {
-    return axiosInstance.get(`brand/${brandId}`, data, {
+const updateProducer = (producerId, data) => {
+    return axiosInstance.get(`producer/${producerId}`, data, {
         headers: {
             'Content-type': 'application/json'
         }
@@ -25,5 +25,5 @@ const updateBrand = (brandId, data) => {
 }
 
 export {
-    getBrands, createBrand, updateBrand
+    getProducer, createProducer, updateProducer
 }

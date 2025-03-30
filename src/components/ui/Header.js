@@ -6,7 +6,7 @@ export const Header = () => {
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container-fluid">
 
-                <NavLink className="navbar-brand" to="/">Inventarios</NavLink>
+                <NavLink className="navbar-brand" to="/">Media</NavLink>
 
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
@@ -18,14 +18,15 @@ export const Header = () => {
                             <NavLink className="nav-link" aria-current="page" to="/">Activos</NavLink>
                         </li>
                         <li className="nav-item">
-                            <NavLink className="nav-link" to="/users">Usuarios</NavLink>
+                            <NavLink className="nav-link" to="/director">Director</NavLink>
                         </li>
                         <li className="nav-item">
-                            <NavLink className="nav-link" to="/brands">Marcas</NavLink>
+                            <NavLink className="nav-link" to="/Producer">Productora</NavLink>
                         </li>
                         <li className="nav-item">
-                            <NavLink className="nav-link" to="states">Estados</NavLink>
+                            <NavLink className="nav-link" to="/gender">Genero</NavLink>
                         </li>
+                        
                         <li className="nav-item">
                             <NavLink className="nav-link" to="types">Tipos</NavLink>
                         </li>
