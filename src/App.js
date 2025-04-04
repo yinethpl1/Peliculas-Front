@@ -7,7 +7,7 @@ import { GenderView } from './components/gender/GenderView'
 import { ProducerView } from './components/producer/ProducerView'
 import { TypeView } from './components/type/TypeView'
 import { UserView } from './components/users/UserView'
-import { InventoryUpdate } from "./components/inventory/InventoryUpdate";
+import { MediaUpdate } from "./components/media/MediaUpdate";
 
 
 function App() {
@@ -20,6 +20,7 @@ function App() {
       <Route exact path='/gender' component={GenderView} />
       <Route exact path='/producer' component={ProducerView} />
       <Route exact path='/types' component={ TypeView} />
+      <Route exact path='/media/:mediaId' component={ MediaUpdate } />
       <Redirect to='/' />
     </Switch>
 </Router>
