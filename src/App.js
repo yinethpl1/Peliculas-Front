@@ -7,6 +7,7 @@ import { GenderView } from './components/gender/GenderView'
 import { ProducerView } from './components/producer/ProducerView'
 import { TypeView } from './components/type/TypeView'
 import { UserView } from './components/users/UserView'
+import { InventoryUpdate } from "./components/inventory/InventoryUpdate";
 
 
 function App() {
