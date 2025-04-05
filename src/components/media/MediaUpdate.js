@@ -1,20 +1,22 @@
-import React, { useState, useEffect, useCallback } from 'react';
+//import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getMediaForId, updateMedia } from '../../services/mediaService';
 import { getDirector } from '../../services/directorService';
 import { getGender } from '../../services/genderService';
-import { getProducer } from '../../services/producerService';
+import { getProducer} from '../../services/producerService';
 import { getType } from '../../services/typeService';
 import Swal from 'sweetalert2';
+import { useCallback, useEffect, useState } from 'react';
 
 export const MediaUpdate = () => {
+
   const { mediaId = '' } = useParams();
-  const [media, setMedia] = useState(null);
+  const [ media,setMedia] = useState(null);
+  const [director, setDirector] = useState([]);
   const [genders, setGenders] = useState([]);
-  const [directors, setDirectors] = useState([]);
-  const [producers, setProducers] = useState([]);
   const [types, setTypes] = useState([]);
-  const [valoresForm, setValoresForm] = useState({
+  const [producers, setProducers] = useState([]);
+  const [formValues, setFormValues] = useState({
     serial: '',
     title: '',
     synopsis: '',
@@ -27,343 +29,320 @@ export const MediaUpdate = () => {
     type: ''
   });
 
-  const { serial, title, synopsis, url, photo, releaseYear, mainGender, mainDirector, producer, type } = valoresForm;
+  const { 
+    serial, 
+    title, 
+    synopsis, 
+    url, 
+    photo, 
+    releaseYear, 
+    mainGender, 
+    mainDirector, 
+    producer, 
+    type 
+  } = formValues;
 
-  // Función para manejar errores de forma consistente
-  const handleError = (error, message) => {
-    console.error(message, error);
-    Swal.fire('Error', message, 'error');
-  };
-
-  // Listar datos con useCallback para memoización
-  const listGenders = useCallback(async () => {
+  const fetchDirector = useCallback(async () => {
+    try {
+      const { data } = await getDirector();
+      setDirector(data);
+    } catch (error) {
+      console.error('Error loading directors:', error);
+    }
+  }, []);
+  
+  const fetchGenders = useCallback(async () => {
     try {
       const { data } = await getGender();
       setGenders(data);
     } catch (error) {
-      handleError(error, 'No se pudieron cargar los géneros');
+      console.error('Error loading genders:', error);
     }
   }, []);
-
-  const listDirectors = useCallback(async () => {
-    try {
-      const { data } = await getDirector();
-      setDirectors(data);
-    } catch (error) {
-      handleError(error, 'No se pudieron cargar los directores');
-    }
-  }, []);
-
-  const listProducers = useCallback(async () => {
+  
+  const fetchProducers = useCallback(async () => {
     try {
       const { data } = await getProducer();
       setProducers(data);
     } catch (error) {
-      handleError(error, 'No se pudieron cargar los productores');
+      console.error('Error loading producers:', error);
     }
   }, []);
-
-  const listTypes = useCallback(async () => {
+  
+  const fetchTypes = useCallback(async () => {
     try {
       const { data } = await getType();
       setTypes(data);
     } catch (error) {
-      handleError(error, 'No se pudieron cargar los tipos');
+      console.error('Error loading types:', error);
     }
   }, []);
-
-  const getMedia = useCallback(async () => {
+  
+  const fetchMedia = useCallback(async () => {
     try {
-      const { data } = await getMediaForId(mediaId);
-      setMedia(data);
-    } catch (error) {
-      handleError(error, 'No se pudo cargar el media');
-    }
-  }, [mediaId]);
-
-  // Cargar todos los datos iniciales
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        await Promise.all([
-          listGenders(),
-          listDirectors(),
-          listProducers(),
-          listTypes()
-        ]);
-        await getMedia();
-      } catch (error) {
-        handleError(error, 'Error al cargar los datos iniciales');
-      }
-    };
-
-    loadInitialData();
-  }, [mediaId, listGenders, listDirectors, listProducers, listTypes, getMedia]);
-
-  // Actualizar formulario cuando media cambia
-  useEffect(() => {
-    if (media) {
-      setValoresForm({
-        serial: media.serial || '',
-        title: media.title || '',
-        synopsis: media.synopsis || '',
-        url: media.url || '',
-        photo: media.photo || '',
-        releaseYear: media.releaseYear || '',
+      const { media } = await getMediaForId(mediaId);
+      setMedia(media);
+      setFormValues({
+        serial: media.serial,
+        title:media.title,
+        //synopsis: media.synopsis,
+        url: media.url,
+        photo: media.photo,
+        releaseYear: media.releaseYear,
         mainGender: media.mainGender?._id || '',
         mainDirector: media.mainDirector?._id || '',
         producer: media.producer?._id || '',
         type: media.type?._id || ''
       });
+    } catch (error) {
+      console.error('Error loading media:', error?.response?.data || error.message || error);
     }
-  }, [media]);
+  }, [mediaId, setMedia, setFormValues]); // Aquí mediaId es la dependencia necesaria
+  
+  // useEffect para cargar los datos
+  useEffect(() => {
+   
+    fetchDirector();
+    fetchGenders();
+    fetchProducers();
+    fetchTypes();
+    if (mediaId) {
+      fetchMedia();
+    }
+  }, [mediaId, fetchDirector, fetchGenders, fetchProducers, fetchTypes, fetchMedia]); 
 
   const handleOnChange = ({ target }) => {
     const { name, value } = target;
-    setValoresForm(prev => ({ ...prev, [name]: value }));
+    setFormValues({ ...formValues, [name]: value });
   };
 
-  const handleOnSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const mediaToUpdate = {
+    const mediaData = {
       serial,
       title,
       synopsis,
       url,
       photo,
       releaseYear,
-      mainGender: mainGender ? { _id: mainGender } : null,
-      mainDirector: mainDirector ? { _id: mainDirector } : null,
-      producer: producer ? { _id: producer } : null,
-      type: type ? { _id: type } : null
+      mainGender: {
+        _id: mainGender
+      },
+      mainDirector: {
+        _id: mainDirector
+      },
+      producer: {
+        _id: producer
+      },
+      type: {
+        _id: type
+      }
     };
 
     try {
       Swal.fire({
+        title: 'Actualizando...',
         allowOutsideClick: false,
-        text: 'Cargando...',
         didOpen: () => Swal.showLoading()
       });
 
-      await updateMedia(mediaId, mediaToUpdate);
-      
+      await updateMedia(mediaId, mediaData);
+
       Swal.fire({
         icon: 'success',
-        title: 'Éxito',
-        text: 'Media actualizado correctamente'
+        title: '¡Éxito!',
+        text: 'Medio actualizado correctamente'
       });
     } catch (error) {
       console.error('Error updating media:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.response?.data?.message || 'No se pudo actualizar el media'
+        text: 'No se pudo actualizar el medio'
       });
     }
   };
 
-  if (!media) {
-    return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </div>
-        <p className="mt-2">Cargando datos del media...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className='container-fluid mt-4'>
-      <div className='row'>
-        <div className='col'>
-          <h3 className='mb-4'>Actualizar Media</h3>
-        </div>
-      </div>
-      
+    <div className='container-fluid mt-3 mb-2'>
       <div className='card'>
+        <div className='card-header'>
+          <h5 className='card-title'>Actualizar Medio</h5>
+        </div>
         <div className='card-body'>
-          <div className='row mb-4'>
+          <div className='row'>
             <div className='col-md-4'>
-              <img 
-                alt='Media' 
-                src={photo || 'https://via.placeholder.com/300x450?text=Imagen+no+disponible'} 
-                className='img-fluid rounded'
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/300x450?text=Imagen+no+disponible';
-                }}
-              />
+              <img src={photo} alt={media} className="img-fluid" />
             </div>
-            
             <div className='col-md-8'>
-              <form onSubmit={handleOnSubmit}>
+              <form onSubmit={handleSubmit}>
                 <div className='row'>
-                  <div className='col-md-6'>
+                  <div className='col'>
                     <div className="mb-3">
                       <label className="form-label">Serial</label>
                       <input 
                         type="text" 
-                        name='serial'
+                        name="serial"
                         value={serial}
                         onChange={handleOnChange}
                         required
-                        className='form-control' 
+                        className="form-control" 
                       />
                     </div>
                   </div>
-                  <div className='col-md-6'>
+
+                  <div className='col'>
                     <div className="mb-3">
                       <label className="form-label">Título</label>
                       <input 
                         type="text" 
-                        name='title'
+                        name="title"
                         value={title}
                         onChange={handleOnChange}
                         required
-                        className='form-control' 
+                        className="form-control" 
                       />
                     </div>
                   </div>
                 </div>
-                
-                <div className="mb-3">
-                  <label className="form-label">Sinopsis</label>
-                  <textarea 
-                    name='synopsis'
-                    value={synopsis}
-                    onChange={handleOnChange}
-                    required
-                    className='form-control'
-                    rows="3"
-                  />
-                </div>
-                
+
+      
                 <div className='row'>
-                  <div className='col-md-6'>
+                  <div className='col'>
                     <div className="mb-3">
                       <label className="form-label">URL</label>
                       <input 
                         type="url" 
-                        name='url'
+                        name="url"
                         value={url}
                         onChange={handleOnChange}
                         required
-                        className='form-control' 
+                        className="form-control" 
                       />
                     </div>
                   </div>
-                  <div className='col-md-6'>
+
+                  <div className='col'>
                     <div className="mb-3">
-                      <label className="form-label">Imagen (URL)</label>
+                      <label className="form-label">Foto</label>
                       <input 
                         type="url" 
-                        name='photo'
+                        name="photo"
                         value={photo}
                         onChange={handleOnChange}
                         required
-                        className='form-control' 
+                        className="form-control" 
                       />
                     </div>
                   </div>
                 </div>
-                
+
                 <div className='row'>
-                  <div className='col-md-3'>
+                  <div className='col'>
                     <div className="mb-3">
-                      <label className="form-label">Año de estreno</label>
+                      <label className="form-label">Año de lanzamiento</label>
                       <input 
                         type="number" 
-                        name='releaseYear'
+                        name="releaseYear"
                         value={releaseYear}
                         onChange={handleOnChange}
                         required
-                        min="1900"
-                        max={new Date().getFullYear()}
-                        className='form-control' 
+                        className="form-control" 
                       />
                     </div>
                   </div>
-                  
-                  <div className='col-md-3'>
+                </div>
+
+                <div className='row'>
+                  <div className='col'>
                     <div className="mb-3">
-                      <label className="form-label">Género principal</label>
-                      <select 
-                        className='form-select'
-                        required
-                        name='mainGender'
+                      <label className="form-label">Género Principal</label>
+                      <select
+                        name="mainGender"
                         value={mainGender}
                         onChange={handleOnChange}
+                        required
+                        className="form-select"
                       >
-                        <option value="">--SELECCIONE--</option>
-                        {genders.map(({ _id, name }) => (
-                          <option key={_id} value={_id}>{name}</option>
+                        <option value="">Seleccione un género</option>
+                        {genders.map(gender => (
+                          <option key={gender._id} value={gender._id}>
+                            {gender.name}
+                          </option>
                         ))}
                       </select>
                     </div>
                   </div>
-                  
-                  <div className='col-md-3'>
+
+                  <div className='col'>
                     <div className="mb-3">
-                      <label className="form-label">Director principal</label>
-                      <select 
-                        className='form-select'
-                        required
-                        name='mainDirector'
+                      <label className="form-label">Director Principal</label>
+                      <select
+                        name="mainDirector"
                         value={mainDirector}
                         onChange={handleOnChange}
+                        required
+                        className="form-select"
                       >
-                        <option value="">--SELECCIONE--</option>
-                        {directors.map(({ _id, name }) => (
-                          <option key={_id} value={_id}>{name}</option>
+                        <option value="">Seleccione un director</option>
+                        {director.map(director => (
+                          <option key={director._id} value={director._id}>
+                            {director.name}
+                          </option>
                         ))}
                       </select>
                     </div>
                   </div>
-                  
-                  <div className='col-md-3'>
+                </div>
+
+                <div className='row'>
+                  <div className='col'>
                     <div className="mb-3">
                       <label className="form-label">Productor</label>
-                      <select 
-                        className='form-select'
-                        required
-                        name='producer'
+                      <select
+                        name="producer"
                         value={producer}
                         onChange={handleOnChange}
+                        required
+                        className="form-select"
                       >
-                        <option value="">--SELECCIONE--</option>
-                        {producers.map(({ _id, name }) => (
-                          <option key={_id} value={_id}>{name}</option>
+                        <option value="">Seleccione un productor</option>
+                        {producers.map(producer => (
+                          <option key={producer._id} value={producer._id}>
+                            {producer.name}
+                          </option>
                         ))}
                       </select>
                     </div>
                   </div>
-                </div>
-                
-                <div className='row'>
-                  <div className='col-md-3'>
+
+                  <div className='col'>
                     <div className="mb-3">
                       <label className="form-label">Tipo</label>
-                      <select 
-                        className='form-select'
-                        required
-                        name='type'
+                      <select
+                        name="type"
                         value={type}
                         onChange={handleOnChange}
+                        required
+                        className="form-select"
                       >
-                        <option value="">--SELECCIONE--</option>
-                        {types.map(({ _id, name }) => (
-                          <option key={_id} value={_id}>{name}</option>
+                        <option value="">Seleccione un tipo</option>
+                        {types.map(type => (
+                          <option key={type._id} value={type._id}>
+                            {type.name}
+                          </option>
                         ))}
                       </select>
                     </div>
                   </div>
                 </div>
-                
-                <div className='d-grid gap-2 d-md-flex justify-content-md-end mt-4'>
-                  <button type="submit" className="btn btn-primary">
-                    Guardar Cambios
-                  </button>
+
+                <div className='row'>
+                  <div className='col'>
+                    <button type="submit" className="btn btn-primary">
+                      Actualizar Medio
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
